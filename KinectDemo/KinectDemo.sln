@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KinectDemo", "KinectDemo\KinectDemo.vcxproj", "{5278EE70-DA7E-4975-8F0C-D257A2FA103B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenCVDemo", "OpenCVDemo\OpenCVDemo.vcxproj", "{4E72D7A8-70A8-486A-BFA0-76A6DDB8E830}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5278EE70-DA7E-4975-8F0C-D257A2FA103B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5278EE70-DA7E-4975-8F0C-D257A2FA103B}.Debug|Win32.Build.0 = Debug|Win32
+		{5278EE70-DA7E-4975-8F0C-D257A2FA103B}.Release|Win32.ActiveCfg = Release|Win32
+		{5278EE70-DA7E-4975-8F0C-D257A2FA103B}.Release|Win32.Build.0 = Release|Win32
+		{4E72D7A8-70A8-486A-BFA0-76A6DDB8E830}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4E72D7A8-70A8-486A-BFA0-76A6DDB8E830}.Debug|Win32.Build.0 = Debug|Win32
+		{4E72D7A8-70A8-486A-BFA0-76A6DDB8E830}.Release|Win32.ActiveCfg = Release|Win32
+		{4E72D7A8-70A8-486A-BFA0-76A6DDB8E830}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

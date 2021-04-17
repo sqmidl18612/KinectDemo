@@ -1,0 +1,9 @@
+Debug
+/KinectDemo/KinectDemo/*.user
+/KinectDemo/KinectDemo/*.filters
+ipch
+/KinectDemo/*.sdf
+/KinectDemo/*.suo
+/KinectDemo/*.opensdf
+/KinectDemo/OpenCVDemo/*.filters
+/KinectDemo/OpenCVDemo/*.user
