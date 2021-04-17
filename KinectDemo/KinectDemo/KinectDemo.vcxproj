@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="skeletondemo.cpp" />
+    <ClCompile Include="handtracker.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5278EE70-DA7E-4975-8F0C-D257A2FA103B}</ProjectGuid>
