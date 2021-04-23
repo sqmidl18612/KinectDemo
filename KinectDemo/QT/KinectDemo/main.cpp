@@ -33,6 +33,10 @@ public:
 		if( CheckError( "Context Initial failed" ) )
 			return false;
 
+        m_eResult = m_Context.SetGlobalMirror(true);
+        if(CheckError( "Set Global Mirror Error" ))
+            return false;
+
 		// create image node
 		m_eResult = m_Image.Create( m_Context );
 		if( CheckError( "Create Image Generator Error" ) )
@@ -55,7 +59,8 @@ public:
 		XnCallbackHandle hUserCB;
 		m_User.RegisterUserCallbacks( CB_NewUser, NULL, NULL, hUserCB );
 
-		m_User.GetSkeletonCap().SetSkeletonProfile( XN_SKEL_PROFILE_ALL );
+        m_User.GetSkeletonCap().SetSkeletonProfile( XN_SKEL_PROFILE_ALL );
+        //m_User.GetSkeletonCap().SetSkeletonProfile( XN_SKEL_PROFILE_UPPER );
 		XnCallbackHandle hCalibCB;
 		m_User.GetSkeletonCap().RegisterToCalibrationComplete( CB_CalibrationComplete, &m_User, hCalibCB );
 
@@ -221,7 +226,7 @@ public:
 	}
 
 	/* update skeleton data */
-	void UpdateSkeleton()
+    void UpdateSkeleton(XnPoint3D &pos)
 	{
 		// read the position in real world
 		XnPoint3D	JointsReal[15];
@@ -243,13 +248,17 @@ public:
 
 		// convert form real world to projective
 		m_OpenNI.GetDepthGenerator().ConvertRealWorldToProjective( 15, JointsReal, m_aJoints );
+        //qDebug("Left hand: (%f, %f)", JointsReal[8].X, JointsReal[8].Y);
+        //captureAction(JointsReal[8]);
+        pos = JointsReal[8];
 	}
 
 public:
 	COpenNI&	m_OpenNI;
 	XnUserID	m_UserID;
 	XnPoint3D	m_aJoints[15];
-	int			m_aConnection[15][2];
+    //static XnPoint3D m_lastHandJoint;
+    int			m_aConnection[15][2];
 
 private:
 	QRectF boundingRect() const
@@ -320,7 +329,8 @@ public:
 	}
 
 	/* Start to update Qt Scene from OpenNI device */
-	bool Start( int iInterval = 33 )
+    bool Start( int iInterval = 33 )
+    //bool Start( int iInterval = 1000 )
 	{
 		m_OpenNI.Start();
 
@@ -347,10 +357,47 @@ private:
 	QGraphicsPixmapItem*	m_pItemImage;
 	uchar*					m_pDepthARGB;
 	vector<CSkelItem*>		m_vSkeleton;
+    XnPoint3D m_lastHandJoint;
+    enum {D = 20};
 
 private:
+    void captureAction(XnPoint3D &pos)
+    {
+        double diffX = pos.X - m_lastHandJoint.X;
+        double diffY = pos.Y - m_lastHandJoint.Y;
+
+        m_lastHandJoint.X = pos.X;
+        m_lastHandJoint.Y = pos.Y;
+
+        if(diffX > D)
+        {
+            qDebug("(%f,%f) - (%f,%f)", pos.X, pos.Y,
+                   m_lastHandJoint.X, m_lastHandJoint.Y);
+            cout << "Right: " << diffX << endl;
+            return;
+        }
+        else if(diffX < -D)
+        {
+            cout << "Left" << endl;
+            return;
+        }
+        else if(diffY > D)
+        {
+            cout << "Up" << endl;
+            return;
+        }
+        else if(diffY < -D)
+        {
+            cout << "Down" << endl;
+            return;
+        }
+
+
+    }
+
 	void timerEvent( QTimerEvent *event )
 	{
+        QApplication::processEvents();
 		// Read OpenNI data
 		m_OpenNI.UpdateData();
 
@@ -426,7 +473,9 @@ private:
 						m_vSkeleton[ counter-1 ]->m_UserID = aUserID[i];
 
 					// update skeleton item data
-					m_vSkeleton[ counter-1 ]->UpdateSkeleton();
+                    XnPoint3D pos;
+                    m_vSkeleton[ counter-1 ]->UpdateSkeleton(pos);
+                    captureAction(pos);
 					m_vSkeleton[ counter-1 ]->setVisible( true );
 				}
 			}
