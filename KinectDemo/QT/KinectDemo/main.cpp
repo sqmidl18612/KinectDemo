@@ -8,6 +8,7 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
+#include <QGraphicsTextItem>
 
 // OpenNI Header
 #include <XnCppWrapper.h>
@@ -124,6 +125,7 @@ private:
 private:
 	static void XN_CALLBACK_TYPE CB_NewUser( xn::UserGenerator& generator, XnUserID user, void* pCookie )
 	{
+        pCookie;
 		cout << "New user identified: " << user << endl;
 		generator.GetPoseDetectionCap().StartPoseDetection("Psi", user);
 	}
@@ -281,6 +283,8 @@ private:
 
 	void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 	{
+        widget;
+        option;
 		// set pen for drawing
 		QPen pen( QColor::fromRgb( 0, 0, 255 ) );
 		pen.setWidth( 3 );
@@ -342,6 +346,10 @@ public:
 		m_pItemDepth = m_Scene.addPixmap( QPixmap() );
 		m_pItemDepth->setZValue( 2 );
 
+        m_pItemAction = m_Scene.addText("Action: ");
+        m_pItemAction->setZValue(3);
+        m_pItemAction->setFont(QFont("MS Shell Dlg 2", 30));
+
 		// update first to get the depth map size
 		m_OpenNI.UpdateData();
 		m_pDepthARGB = new uchar[4*m_OpenNI.m_DepthMD.XRes()*m_OpenNI.m_DepthMD.YRes()];
@@ -355,48 +363,78 @@ private:
 	QGraphicsScene&			m_Scene;
 	QGraphicsPixmapItem*	m_pItemDepth;
 	QGraphicsPixmapItem*	m_pItemImage;
+    QGraphicsTextItem*      m_pItemAction;
 	uchar*					m_pDepthARGB;
 	vector<CSkelItem*>		m_vSkeleton;
     XnPoint3D m_lastHandJoint;
     enum {D = 20};
+    QString m_Action;
 
 private:
     void captureAction(XnPoint3D &pos)
     {
         double diffX = pos.X - m_lastHandJoint.X;
         double diffY = pos.Y - m_lastHandJoint.Y;
+        double diffZ = pos.Z - m_lastHandJoint.Z;
 
         m_lastHandJoint.X = pos.X;
         m_lastHandJoint.Y = pos.Y;
+        m_lastHandJoint.Z = pos.Z;
+
+        if((pos.X == diffX) &&
+                (pos.Y == diffY) && (pos.Z == diffZ))
+            return ;
+
+#if 0
+        if(diffZ > D)
+        {
+            cout << "Back: " << diffZ << endl;
+            return;
+        }
+#endif
+
+        if(diffZ < -D)
+        {
+            cout << "Stop: " << diffZ << endl;
+            m_Action = "Stop";
+            return ;
+        }
 
         if(diffX > D)
         {
             qDebug("(%f,%f) - (%f,%f)", pos.X, pos.Y,
                    m_lastHandJoint.X, m_lastHandJoint.Y);
             cout << "Right: " << diffX << endl;
-            return;
-        }
-        else if(diffX < -D)
-        {
-            cout << "Left" << endl;
-            return;
-        }
-        else if(diffY > D)
-        {
-            cout << "Up" << endl;
-            return;
-        }
-        else if(diffY < -D)
-        {
-            cout << "Down" << endl;
-            return;
+            m_Action = "Right";
+            return ;
         }
 
+        if(diffX < -D)
+        {
+            cout << "Left" << endl;
+            m_Action = "Left";
+            return ;
+        }
+
+        if(diffY > D)
+        {
+            cout << "Up" << endl;
+            m_Action = "Up";
+            return ;
+        }
+
+        if(diffY < -D)
+        {
+            cout << "Down" << endl;
+            m_Action = "Down";
+            return ;
+        }
 
     }
 
 	void timerEvent( QTimerEvent *event )
 	{
+        event->ignore();
         QApplication::processEvents();
 		// Read OpenNI data
 		m_OpenNI.UpdateData();
@@ -405,7 +443,7 @@ private:
 		{
 			// convert to RGBA format
 			const XnDepthPixel*  pDepth = m_OpenNI.m_DepthMD.Data();
-			unsigned int iSize=m_OpenNI.m_DepthMD.XRes()*m_OpenNI.m_DepthMD.YRes();
+            unsigned int iSize = m_OpenNI.m_DepthMD.XRes()*m_OpenNI.m_DepthMD.YRes();
 
 			// fin the max value
 			XnDepthPixel tMax = *pDepth;
@@ -476,6 +514,7 @@ private:
                     XnPoint3D pos;
                     m_vSkeleton[ counter-1 ]->UpdateSkeleton(pos);
                     captureAction(pos);
+                    m_pItemAction->setPlainText("Action: " + m_Action);
 					m_vSkeleton[ counter-1 ]->setVisible( true );
 				}
 			}
@@ -494,7 +533,7 @@ int main( int argc, char** argv )
 {
 	// initial OpenNI
 	COpenNI mOpenNI;
-	bool bStatus = true;
+    //bool bStatus = true;
 	if( !mOpenNI.Initial() )
 		return 1;
 
